@@ -31,6 +31,7 @@ const filters: SeverityFilter[] = ['All', 'Critical', 'High', 'Medium']
 function App() {
   const [selectedIncident, setSelectedIncident] = useState(incidents[0])
   const [activeFilter, setActiveFilter] = useState<SeverityFilter>('All')
+  const [isBriefingVisible, setIsBriefingVisible] = useState(false)
   const filteredIncidents = activeFilter === 'All' ? incidents : incidents.filter((incident) => incident.severity === activeFilter)
 
   return (
@@ -44,8 +45,10 @@ function App() {
         <p className="eyebrow">OPERATIONS COMMAND · NEW YORK CITY</p>
         <h1 id="page-title">City Operations Center</h1>
         <p className="hero-copy">Monitor, coordinate, and resolve active incidents across the city from one secure command view.</p>
-        <div className="hero-actions"><button className="primary-button" type="button">View incident map <span aria-hidden="true">→</span></button><button className="secondary-button" type="button">Generate briefing</button></div>
+        <div className="hero-actions"><a className="primary-button" href="#incident-map">View incident map <span aria-hidden="true">→</span></a><button className="secondary-button" type="button" onClick={() => setIsBriefingVisible(true)}>Generate briefing</button></div>
       </section>
+
+      {isBriefingVisible && <section className="briefing-panel" aria-labelledby="briefing-title"><div className="briefing-topline"><p className="eyebrow">BRIEFING GENERATED · LOCAL PROTOTYPE</p><button type="button" onClick={() => setIsBriefingVisible(false)} aria-label="Close briefing">×</button></div><h2 id="briefing-title">Operations Briefing</h2><p className="briefing-summary">Three incidents require active coordination. Prioritize the structural anomaly in Midtown, where units are already dispatched. Continue assessing the unauthorized drone activity at Pier 14 and keep the Queensboro Bridge response unit on route.</p><div className="briefing-actions"><div><span>Recommended priority</span><strong>Secure Midtown perimeter</strong></div><div><span>Next review</span><strong>In 10 minutes</strong></div><button className="text-button" type="button" onClick={() => setIsBriefingVisible(false)}>Dismiss briefing</button></div></section>}
 
       <section className="metrics" aria-label="Operations overview">
         {metrics.map((metric) => <article className={`metric-card ${metric.tone}`} key={metric.label}><p>{metric.label}</p><strong>{metric.value}</strong><span>{metric.detail}</span></article>)}
