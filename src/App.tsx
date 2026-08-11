@@ -11,6 +11,8 @@ type Incident = {
   position: { left: string; top: string }
 }
 
+type SeverityFilter = 'All' | Incident['severity']
+
 const metrics = [
   { label: 'Active Incidents', value: '12', detail: '+2 since last hour', tone: 'alert' },
   { label: 'High Priority', value: '3', detail: 'Requires attention', tone: 'critical' },
@@ -24,8 +26,12 @@ const incidents: Incident[] = [
   { id: 'INC-2046', severity: 'Medium', location: 'Queensboro Bridge', description: 'Traffic sensors report an obstruction in the westbound lane.', time: '24 min ago', status: 'Response unit en route', position: { left: '35%', top: '54%' } },
 ]
 
+const filters: SeverityFilter[] = ['All', 'Critical', 'High', 'Medium']
+
 function App() {
   const [selectedIncident, setSelectedIncident] = useState(incidents[0])
+  const [activeFilter, setActiveFilter] = useState<SeverityFilter>('All')
+  const filteredIncidents = activeFilter === 'All' ? incidents : incidents.filter((incident) => incident.severity === activeFilter)
 
   return (
     <main className="app-shell">
@@ -59,9 +65,9 @@ function App() {
       </section>
 
       <section className="incidents-section" aria-labelledby="incidents-title">
-        <div className="section-heading"><div><p className="eyebrow">REAL-TIME FEED</p><h2 id="incidents-title">Live Incidents</h2></div><button className="text-button" type="button">View all incidents <span aria-hidden="true">→</span></button></div>
+        <div className="section-heading"><div><p className="eyebrow">REAL-TIME FEED</p><h2 id="incidents-title">Live Incidents <span className="incident-count">{filteredIncidents.length}</span></h2></div><div className="filter-bar" aria-label="Filter incidents by severity">{filters.map((filter) => <button className={activeFilter === filter ? 'active' : ''} type="button" aria-pressed={activeFilter === filter} key={filter} onClick={() => setActiveFilter(filter)}>{filter}</button>)}</div></div>
         <div className="incident-list">
-          {incidents.map((incident) => <article className="incident-card" key={incident.id}><div className={`severity-dot ${incident.severity.toLowerCase()}`} aria-hidden="true" /><div className="incident-main"><div className="incident-meta"><span className={`severity-label ${incident.severity.toLowerCase()}`}>{incident.severity}</span><span>{incident.id}</span></div><h3>{incident.location}</h3><p>{incident.description}</p></div><div className="incident-status"><time>{incident.time}</time><span>{incident.status}</span></div></article>)}
+          {filteredIncidents.map((incident) => <article className="incident-card" key={incident.id}><div className={`severity-dot ${incident.severity.toLowerCase()}`} aria-hidden="true" /><div className="incident-main"><div className="incident-meta"><span className={`severity-label ${incident.severity.toLowerCase()}`}>{incident.severity}</span><span>{incident.id}</span></div><h3>{incident.location}</h3><p>{incident.description}</p></div><div className="incident-status"><time>{incident.time}</time><span>{incident.status}</span></div></article>)}
         </div>
       </section>
     </main>
