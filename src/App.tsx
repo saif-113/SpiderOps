@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './App.css'
 
 type Incident = {
@@ -7,6 +8,7 @@ type Incident = {
   description: string
   time: string
   status: string
+  position: { left: string; top: string }
 }
 
 const metrics = [
@@ -17,12 +19,14 @@ const metrics = [
 ]
 
 const incidents: Incident[] = [
-  { id: 'INC-2048', severity: 'Critical', location: 'Midtown · 8th Avenue', description: 'Structural anomaly reported near the elevated transit line.', time: '2 min ago', status: 'Units dispatched' },
-  { id: 'INC-2047', severity: 'High', location: 'Harbor District · Pier 14', description: 'Unauthorized drone activity detected over restricted airspace.', time: '11 min ago', status: 'Assessment in progress' },
-  { id: 'INC-2046', severity: 'Medium', location: 'Queensboro Bridge', description: 'Traffic sensors report an obstruction in the westbound lane.', time: '24 min ago', status: 'Response unit en route' },
+  { id: 'INC-2048', severity: 'Critical', location: 'Midtown · 8th Avenue', description: 'Structural anomaly reported near the elevated transit line.', time: '2 min ago', status: 'Units dispatched', position: { left: '48%', top: '28%' } },
+  { id: 'INC-2047', severity: 'High', location: 'Harbor District · Pier 14', description: 'Unauthorized drone activity detected over restricted airspace.', time: '11 min ago', status: 'Assessment in progress', position: { left: '70%', top: '68%' } },
+  { id: 'INC-2046', severity: 'Medium', location: 'Queensboro Bridge', description: 'Traffic sensors report an obstruction in the westbound lane.', time: '24 min ago', status: 'Response unit en route', position: { left: '35%', top: '54%' } },
 ]
 
 function App() {
+  const [selectedIncident, setSelectedIncident] = useState(incidents[0])
+
   return (
     <main className="app-shell">
       <nav className="topbar" aria-label="Main navigation">
@@ -39,6 +43,19 @@ function App() {
 
       <section className="metrics" aria-label="Operations overview">
         {metrics.map((metric) => <article className={`metric-card ${metric.tone}`} key={metric.label}><p>{metric.label}</p><strong>{metric.value}</strong><span>{metric.detail}</span></article>)}
+      </section>
+
+      <section className="map-section" id="incident-map" aria-labelledby="map-title">
+        <div className="section-heading"><div><p className="eyebrow">TACTICAL OVERVIEW</p><h2 id="map-title">Incident Map</h2></div><span className="map-key"><i /> Active incident <i /> Response unit</span></div>
+        <div className="map-layout">
+          <div className="city-map" role="group" aria-label="Illustrated city incident map">
+            <span className="district district-one">MIDTOWN</span><span className="district district-two">EAST RIVER</span><span className="district district-three">HARBOR</span>
+            <span className="river" aria-hidden="true" />
+            {incidents.map((incident) => <button className={`map-marker ${incident.severity.toLowerCase()} ${selectedIncident.id === incident.id ? 'selected' : ''}`} style={incident.position} type="button" key={incident.id} aria-label={`Select ${incident.id}, ${incident.location}`} onClick={() => setSelectedIncident(incident)}><span>{incident.id}</span></button>)}
+            <span className="response-unit unit-one" title="Response unit" aria-label="Response unit" /><span className="response-unit unit-two" title="Response unit" aria-label="Response unit" />
+          </div>
+          <aside className="map-details" aria-live="polite"><p className="eyebrow">SELECTED INCIDENT</p><div className="detail-heading"><span className={`severity-dot ${selectedIncident.severity.toLowerCase()}`} aria-hidden="true" /><span className={`severity-label ${selectedIncident.severity.toLowerCase()}`}>{selectedIncident.severity}</span><span>{selectedIncident.id}</span></div><h3>{selectedIncident.location}</h3><p>{selectedIncident.description}</p><div className="detail-status"><span>Current status</span><strong>{selectedIncident.status}</strong></div><button className="primary-button" type="button">Open incident <span aria-hidden="true">→</span></button></aside>
+        </div>
       </section>
 
       <section className="incidents-section" aria-labelledby="incidents-title">
