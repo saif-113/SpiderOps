@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 type Incident = { id: string; severity: 'Critical' | 'High' | 'Medium'; location: string; description: string; time: string; status: string; unit: string; note: string; position: { left: string; top: string } }
@@ -30,8 +30,36 @@ function App() {
   const [draftNote, setDraftNote] = useState(selectedIncident.note)
   const filteredIncidents = activeFilter === 'All' ? incidentRecords : incidentRecords.filter((incident) => incident.severity === activeFilter)
 
+  useEffect(() => {
+    async function loadIncidents() {
+      try {
+        const response = await fetch('http://localhost:3001/api/incidents')
+        if (!response.ok) throw new Error('Could not load incidents')
+        const loadedIncidents = await response.json() as Incident[]
+        if (loadedIncidents.length > 0) {
+          setIncidentRecords(loadedIncidents)
+          setSelectedIncident(loadedIncidents[0])
+        }
+      } catch {
+        console.info('Local API is unavailable; displaying the built-in demo incidents.')
+      }
+    }
+    loadIncidents()
+  }, [])
+
   function openEditor() { setDraftStatus(selectedIncident.status); setDraftUnit(selectedIncident.unit); setDraftNote(selectedIncident.note); setIsEditorOpen(true) }
-  function saveIncident() { const updated = { ...selectedIncident, status: draftStatus, unit: draftUnit, note: draftNote }; setIncidentRecords((records) => records.map((incident) => incident.id === updated.id ? updated : incident)); setSelectedIncident(updated); setIsEditorOpen(false) }
+  async function saveIncident() {
+    try {
+      const response = await fetch(`http://localhost:3001/api/incidents/${selectedIncident.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: draftStatus, unit: draftUnit, note: draftNote }) })
+      if (!response.ok) throw new Error('Could not save incident')
+      const updated = await response.json() as Incident
+      setIncidentRecords((records) => records.map((incident) => incident.id === updated.id ? updated : incident))
+      setSelectedIncident(updated)
+      setIsEditorOpen(false)
+    } catch {
+      window.alert('The local API is not running. Start it with npm.cmd run server, then try again.')
+    }
+  }
 
   return <main className="app-shell">
     <nav className="topbar" aria-label="Main navigation"><a className="brand" href="#overview" aria-label="SpiderOps dashboard home"><span className="brand-mark" aria-hidden="true">*</span><span>SpiderOps</span></a><div className="nav-actions"><span className="system-status"><span aria-hidden="true" />SYSTEM ONLINE</span><button className="avatar" type="button" aria-label="Open operator profile">S</button></div></nav>
