@@ -1,3 +1,5 @@
+import 'dotenv/config'
+import { GoogleGenAI } from '@google/genai'
 import cors from 'cors'
 import Database from 'better-sqlite3'
 import express from 'express'
@@ -10,6 +12,7 @@ const dataDirectory = path.join(currentDirectory, '..', 'data')
 fs.mkdirSync(dataDirectory, { recursive: true })
 
 const database = new Database(path.join(dataDirectory, 'spiderops.sqlite'))
+const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null
 database.pragma('journal_mode = WAL')
 database.exec(`
   CREATE TABLE IF NOT EXISTS incidents (
@@ -67,6 +70,106 @@ app.put('/api/incidents/:id', (request, response) => {
   }
   const incident = database.prepare('SELECT * FROM incidents WHERE id = ?').get(request.params.id)
   response.json(toClientIncident(incident))
+})
+app.post('/api/incidents/:id/analyze', async (request, response) => {
+  if (!ai) {
+    response.status(503).json({ error: 'Gemini is not configured on the server.' })
+    return
+  }
+
+  const incident = database.prepare(
+    'SELECT id, severity, location, description, status, unit, note FROM incidents WHERE id = ?'
+  ).get(request.params.id)
+
+  if (!incident) {
+    response.status(404).json({ error: 'Incident not found.' })
+    return
+  }
+
+  const prompt = `You are an operations analyst for a fictional city incident dashboard.
+
+Analyze the incident below using ONLY the information provided.
+
+Rules:
+- Do not invent facts.
+- Do not change the stored severity.
+- Clearly distinguish known information from recommendations.
+- If the information is insufficient, say so.
+- Keep each response concise.
+
+Incident data:
+${JSON.stringify(incident)}`
+
+  try {
+    const result = await ai.interactions.create({
+      model: 'gemini-3.6-flash',
+      input: prompt,
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: {
+          type: 'object',
+          properties: {
+            priority: {
+              type: 'string',
+              enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
+            },
+            why: {
+              type: 'string',
+            },
+            recommendedAction: {
+              type: 'string',
+            },
+            concerns: {
+              type: 'string',
+            },
+            confidence: {
+              type: 'string',
+              enum: ['HIGH', 'MEDIUM', 'LOW'],
+            },
+          },
+          required: [
+            'priority',
+            'why',
+            'recommendedAction',
+            'concerns',
+            'confidence',
+          ],
+        },
+      },
+    })
+
+    const analysis = JSON.parse(result.output_text)
+    response.json({ analysis })
+  } catch (error) {
+    console.error(
+      'Gemini incident analysis failed:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    response.status(502).json({
+      error: 'Gemini could not analyze the incident. Please try again.',
+    })
+  }
+})
+app.post('/api/briefing', async (_request, response) => {
+  if (!ai) {
+    response.status(503).json({ error: 'Gemini is not configured on the server.' })
+    return
+  }
+
+  const incidents = database.prepare('SELECT id, severity, location, description, status, unit, note FROM incidents ORDER BY id').all()
+  const prompt = `You are an operations assistant for a fictional city incident dashboard. Create a concise briefing based only on this incident data. State the highest priority, recommended next action, and any resolved items. Use no more than 110 words. Do not invent facts.\n\n${JSON.stringify(incidents)}`
+
+  try {
+  const result = await ai.interactions.create({
+    model: 'gemini-3.6-flash',
+    input: prompt,
+  })
+  response.json({ briefing: result.output_text?.trim() || 'No briefing was generated.' })
+  } catch (error) {
+  console.error('Gemini briefing request failed:', error instanceof Error ? error.message : 'Unknown error')
+  response.status(502).json({ error: 'Gemini could not generate a briefing. Please try again.' })
+  }
 })
 
 app.listen(3001, () => console.log('SpiderOps API listening on http://localhost:3001'))

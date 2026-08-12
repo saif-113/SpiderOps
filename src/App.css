@@ -13,3 +13,163 @@ body { margin: 0; min-width: 320px; background: #090a0f; } button { font: inheri
 .text-button { padding: 0; border: 0; color: #f25b70; background: transparent; font-size: .85rem; font-weight: 700; }.text-button:hover { color: #ff8191; }
 
 .operator-note { margin-top: 10px !important; color: #8c92a1 !important; font-size: .76rem !important; font-style: italic; }.modal-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(3, 4, 8, .75); backdrop-filter: blur(5px); }.incident-editor { width: min(100%, 520px); padding: 28px; border: 1px solid #5b3540; border-radius: 14px; background: #171820; box-shadow: 0 28px 90px rgba(0, 0, 0, .5); }.editor-heading { display: flex; align-items: start; justify-content: space-between; }.editor-heading .eyebrow { margin-bottom: 8px; }.editor-heading h2 { margin-bottom: 0; }.editor-heading button { width: 28px; height: 28px; border: 0; border-radius: 6px; color: #abb0bf; background: transparent; font-size: 1.15rem; }.editor-location { margin: 8px 0 24px; color: #b7bdca; font-size: .88rem; }.incident-editor label { display: grid; gap: 8px; margin: 16px 0; color: #bfc4d0; font-size: .78rem; font-weight: 700; }.incident-editor input, .incident-editor select, .incident-editor textarea { width: 100%; padding: 10px 11px; border: 1px solid #3c404d; border-radius: 7px; color: #f3f4f8; background: #101116; font: inherit; }.incident-editor textarea { resize: vertical; }.incident-editor input:focus, .incident-editor select:focus, .incident-editor textarea:focus { outline: 2px solid rgba(239, 60, 89, .45); border-color: #dc3b56; }.editor-actions { display: flex; align-items: center; justify-content: end; gap: 18px; margin-top: 25px; }
+
+.incident-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.incident-actions button {
+  white-space: nowrap;
+}
+
+.incident-actions button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.incident-analysis {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #30333e;
+}
+
+.analysis-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.analysis-heading .eyebrow {
+  margin-bottom: 6px;
+  color: #f04a67;
+}
+
+.analysis-heading h4 {
+  margin: 0;
+  color: #f3f4f8;
+  font-size: .98rem;
+  letter-spacing: -.02em;
+}
+
+.analysis-confidence {
+  flex-shrink: 0;
+  padding: 4px 7px;
+  border: 1px solid #365b4a;
+  border-radius: 4px;
+  color: #70dda4;
+  background: rgba(86, 216, 147, .08);
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+
+.analysis-confidence.medium {
+  border-color: #65562f;
+  color: #ffca69;
+  background: rgba(255, 159, 62, .08);
+}
+
+.analysis-confidence.low {
+  border-color: #5b3540;
+  color: #ff8191;
+  background: rgba(244, 50, 79, .08);
+}
+
+.analysis-priority {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 11px 12px;
+  border: 1px solid #30333e;
+  border-radius: 7px;
+  background: #111319;
+}
+
+.analysis-priority span {
+  color: #838999;
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.analysis-priority strong {
+  padding: 4px 7px;
+  border-radius: 4px;
+  color: #ffb45c;
+  background: rgba(255, 159, 62, .12);
+  font-size: .67rem;
+  letter-spacing: .06em;
+}
+.analysis-priority strong.analysis-priority-critical {
+  color: #ff6c80;
+  background: rgba(244, 50, 79, .12);
+}
+
+.analysis-priority strong.analysis-priority-high {
+  color: #ffb45c;
+  background: rgba(255, 159, 62, .12);
+}
+
+.analysis-priority strong.analysis-priority-medium {
+  color: #68a9ff;
+  background: rgba(76, 155, 255, .12);
+}
+
+.analysis-priority strong.analysis-priority-low {
+  color: #70dda4;
+  background: rgba(86, 216, 147, .08);
+}
+.analysis-item {
+  margin-top: 13px;
+}
+
+.analysis-item span {
+  display: block;
+  margin-bottom: 5px;
+  color: #858c9d;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.analysis-item p {
+  margin: 0 !important;
+  color: #b8bdca !important;
+  font-size: .78rem !important;
+  line-height: 1.55 !important;
+}
+
+.incident-analysis small {
+  display: block;
+  margin-top: 18px;
+  padding-top: 13px;
+  border-top: 1px solid #292c36;
+  color: #686f80;
+  font-size: .64rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .incident-actions {
+    flex-direction: column;
+  }
+
+  .incident-actions button {
+    width: 100%;
+  }
+
+  .analysis-heading {
+    flex-direction: column;
+  }
+
+  .analysis-confidence {
+    align-self: flex-start;
+  }
+}   
