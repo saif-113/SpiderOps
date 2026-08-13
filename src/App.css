@@ -36,6 +36,143 @@ body { margin: 0; min-width: 320px; background: #090a0f; } button { font: inheri
   border-top: 1px solid #30333e;
 }
 
+.response-plan {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #30333e;
+}
+
+.response-plan-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.response-plan-heading .eyebrow {
+  margin-bottom: 6px;
+  color: #f04a67;
+}
+
+.response-plan-heading h4 {
+  margin: 0;
+  color: #f3f4f8;
+  font-size: .98rem;
+  letter-spacing: -.02em;
+}
+
+.response-plan-unit {
+  flex-shrink: 0;
+  padding: 4px 7px;
+  border: 1px solid #365b4a;
+  border-radius: 4px;
+  color: #70dda4;
+  background: rgba(86, 216, 147, .08);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.response-plan-objective {
+  margin-bottom: 18px;
+  padding: 12px;
+  border: 1px solid #30333e;
+  border-radius: 7px;
+  background: #111319;
+}
+
+.response-plan-objective span,
+.response-plan-section > span,
+.response-plan-note > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #858c9d;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.response-plan-objective p,
+.response-plan-section p,
+.response-plan-note p {
+  margin: 0 !important;
+  color: #b8bdca !important;
+  font-size: .78rem !important;
+  line-height: 1.55 !important;
+}
+
+.response-plan-section {
+  margin-top: 15px;
+}
+
+.response-plan-section ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: response-action;
+}
+
+.response-plan-section li {
+  position: relative;
+  padding: 10px 10px 10px 34px;
+  border: 1px solid #292c36;
+  border-radius: 6px;
+  color: #b8bdca;
+  background: #111319;
+  font-size: .77rem;
+  line-height: 1.5;
+  counter-increment: response-action;
+}
+
+.response-plan-section li::before {
+  content: counter(response-action, decimal-leading-zero);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #f04a67;
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.response-plan-note {
+  margin-top: 17px;
+  padding: 11px 12px;
+  border-left: 2px solid #5b3540;
+  background: rgba(244, 50, 79, .04);
+}
+
+.response-plan-note > span {
+  color: #a8adba;
+}
+
+.response-plan-note p {
+  color: #9da3b2 !important;
+}
+
+.response-plan > small {
+  display: block;
+  margin-top: 18px;
+  padding-top: 13px;
+  border-top: 1px solid #292c36;
+  color: #686f80;
+  font-size: .64rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .response-plan-heading {
+    flex-direction: column;
+  }
+
+  .response-plan-unit {
+    align-self: flex-start;
+  }
+}
+
 .analysis-heading {
   display: flex;
   align-items: flex-start;

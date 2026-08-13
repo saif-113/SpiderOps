@@ -151,6 +151,108 @@ ${JSON.stringify(incident)}`
     })
   }
 })
+app.post('/api/incidents/:id/response-plan', async (request, response) => {
+  if (!ai) {
+    response.status(503).json({ error: 'Gemini is not configured on the server.' })
+    return
+  }
+
+  const incident = database.prepare(
+    'SELECT id, severity, location, description, status, unit, note FROM incidents WHERE id = ?'
+  ).get(request.params.id)
+
+  if (!incident) {
+    response.status(404).json({ error: 'Incident not found.' })
+    return
+  }
+
+  const { analysis } = request.body
+
+  if (!analysis || typeof analysis !== 'object') {
+    response.status(400).json({ error: 'Incident analysis is required.' })
+    return
+  }
+
+  const prompt = `You are an operations planning assistant for a fictional city incident dashboard.
+
+Create a concise response plan using ONLY the supplied incident data and incident analysis.
+
+Rules:
+- Do not invent facts, personnel, units, resources, locations, sensor data, or external events.
+- Do not claim that a recommended action has already happened.
+- Do not change the incident severity or status.
+- Use the assigned unit from the incident data. Do not invent another unit.
+- Clearly distinguish recommendations from known facts.
+- Every factual statement must be directly supported by the incident data or incident analysis.
+- Do not introduce new causes, damage, risks, events, or conditions that are not explicitly stated in the supplied information.
+- Escalation triggers must be hypothetical conditions, not claims that those conditions currently exist.
+- immediateActions must contain only actionable steps. Do not put explanations, warnings, uncertainty, or notes in this list.
+- Put any important uncertainty or missing information in planningNote.
+- If information is insufficient for a specific recommendation, say so.
+- Keep the plan practical and concise.
+
+Incident data:
+${JSON.stringify(incident)}
+
+Incident analysis:
+${JSON.stringify(analysis)}`
+
+  try {
+    const result = await ai.interactions.create({
+      model: 'gemini-3.6-flash',
+      input: prompt,
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: {
+          type: 'object',
+          properties: {
+            objective: {
+              type: 'string',
+            },
+            immediateActions: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+            assignedUnit: {
+              type: 'string',
+            },
+            escalationTrigger: {
+              type: 'string',
+            },
+            completionCriteria: {
+              type: 'string',
+            },
+            planningNote: {
+             type: 'string',
+            },
+          },
+          required: [
+            'objective',
+            'immediateActions',
+            'assignedUnit',
+            'escalationTrigger',
+            'completionCriteria',
+            'planningNote',
+          ],
+        },
+      },
+    })
+
+    const responsePlan = JSON.parse(result.output_text)
+    response.json({ responsePlan })
+  } catch (error) {
+    console.error(
+      'Gemini response plan failed:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    response.status(502).json({
+      error: 'Gemini could not generate a response plan. Please try again.',
+    })
+  }
+})
 app.post('/api/briefing', async (_request, response) => {
   if (!ai) {
     response.status(503).json({ error: 'Gemini is not configured on the server.' })
